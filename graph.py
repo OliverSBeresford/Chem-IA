@@ -187,7 +187,7 @@ def main():
 	)
 
 	plt.title("Hydrogen Production Rate vs Temperature")
-	plt.xlabel("Temperature (°C)")
+	plt.xlabel("Temperature (K)")
 	plt.ylabel("Rate (mol/s)")
 	plt.grid(alpha=0.25)
 	plt.legend()
@@ -235,7 +235,7 @@ def main():
 	)
 
 	plt.title("ln(Hydrogen Production Rate) vs Temperature with Uncertainty")
-	plt.xlabel("Temperature (°C)")
+	plt.xlabel("Temperature (K)")
 	plt.ylabel("ln(Hydrogen Production Rate)")
 	plt.grid(alpha=0.25)
 	plt.legend()
