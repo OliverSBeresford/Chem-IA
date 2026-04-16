@@ -14,13 +14,13 @@ def load_data(csv_path: Path):
 		for row in reader:
 			rows.append(row)
 
-	temperatures_c = np.array([float(r["Average Temp"]) + 273.15 for r in rows], dtype=float)
+	temperatures_k = np.array([float(r["Average Temp"]) + 273.15 for r in rows], dtype=float)
 	temperature_uncertainties = np.array([float(r["Temp Uncertainty"]) for r in rows], dtype=float)
 
 	rate_values = np.array([float(r["Average Rate (temp)"]) for r in rows], dtype=float)
 	rate_uncertainties = np.array([float(r["Rate Uncertainty (Temp)"]) for r in rows], dtype=float)
 
-	return temperatures_c, temperature_uncertainties, rate_values, rate_uncertainties
+	return temperatures_k, temperature_uncertainties, rate_values, rate_uncertainties
 
 
 def fit_trendline(x_values: np.ndarray, y_values: np.ndarray):
@@ -102,10 +102,10 @@ def main():
 	base_dir = Path(__file__).resolve().parent
 	csv_path = base_dir / "data.csv"
     
-	temperatures_c, temperature_uncertainties, rate_values, rate_uncertainties = load_data(csv_path)
+	temperatures_k, temperature_uncertainties, rate_values, rate_uncertainties = load_data(csv_path)
 
 	(rate_best_fit, rate_min_fit, rate_max_fit) = fit_best_min_max(
-		temperatures_c,
+		temperatures_k,
 		temperature_uncertainties,
 		rate_values,
 		rate_uncertainties,
@@ -115,7 +115,7 @@ def main():
 	rate_max_slope, rate_max_intercept = rate_max_fit
 
 	rate_r2 = r2_score(
-		temperatures_c,
+		temperatures_k,
 		rate_values,
 		rate_best_slope,
 		rate_best_intercept,
@@ -124,10 +124,11 @@ def main():
 	# Uncertainty propagation for ln(y): sigma_ln(y) = sigma_y / y
 	ln_rate_values = np.log(rate_values)
 	ln_rate_uncertainties = rate_uncertainties / rate_values
+	inverse_temperatures_k, inverse_temperature_uncertainties = 1.0 / temperatures_k, (1.0 / temperatures_k) * (temperature_uncertainties / temperatures_k)
 
 	(ln_rate_best_fit, ln_rate_min_fit, ln_rate_max_fit) = fit_best_min_max(
-		temperatures_c,
-		temperature_uncertainties,
+		inverse_temperatures_k,
+		inverse_temperature_uncertainties,
 		ln_rate_values,
 		ln_rate_uncertainties,
 	)
@@ -136,23 +137,28 @@ def main():
 	ln_rate_max_slope, ln_rate_max_intercept = ln_rate_max_fit
 
 	ln_rate_r2 = r2_score(
-		temperatures_c,
+		inverse_temperatures_k,
 		ln_rate_values,
 		ln_rate_best_slope,
 		ln_rate_best_intercept,
 	)
 
-	temperature_line = np.linspace(temperatures_c.min() - 1, temperatures_c.max() + 1, 200)
+	temperature_line = np.linspace(temperatures_k.min() - 1, temperatures_k.max() + 1, 200)
+	inverse_temperature_line = np.linspace(
+		inverse_temperatures_k.min() - inverse_temperature_uncertainties.max(),
+		inverse_temperatures_k.max() + inverse_temperature_uncertainties.max(),
+		200,
+	)
 	rate_best_line = rate_best_slope * temperature_line + rate_best_intercept
 	rate_min_line = rate_min_slope * temperature_line + rate_min_intercept
 	rate_max_line = rate_max_slope * temperature_line + rate_max_intercept
-	ln_rate_best_line = ln_rate_best_slope * temperature_line + ln_rate_best_intercept
-	ln_rate_min_line = ln_rate_min_slope * temperature_line + ln_rate_min_intercept
-	ln_rate_max_line = ln_rate_max_slope * temperature_line + ln_rate_max_intercept
+	ln_rate_best_line = ln_rate_best_slope * inverse_temperature_line + ln_rate_best_intercept
+	ln_rate_min_line = ln_rate_min_slope * inverse_temperature_line + ln_rate_min_intercept
+	ln_rate_max_line = ln_rate_max_slope * inverse_temperature_line + ln_rate_max_intercept
 
 	plt.figure(figsize=(9, 6))
 	plt.errorbar(
-		temperatures_c,
+		temperatures_k,
 		rate_values,
 		xerr=temperature_uncertainties,
 		yerr=rate_uncertainties,
@@ -199,9 +205,9 @@ def main():
 
 	plt.figure(figsize=(9, 6))
 	plt.errorbar(
-		temperatures_c,
+		inverse_temperatures_k,
 		ln_rate_values,
-		xerr=temperature_uncertainties,
+		xerr=inverse_temperature_uncertainties,
 		yerr=ln_rate_uncertainties,
 		fmt="s",
 		capsize=3,
@@ -210,32 +216,32 @@ def main():
 	)
 
 	plt.plot(
-		temperature_line,
+		inverse_temperature_line,
 		ln_rate_best_line,
 		"--",
 		color="#1f77b4",
 		alpha=0.9,
-		label=f"Best fit in ln-space: gradient = {ln_rate_best_slope:.6f}, y-intercept = {ln_rate_best_intercept:.6f}, R^2 = {ln_rate_r2:.4f}",
+		label=f"Best fit: gradient = {ln_rate_best_slope:.6f}, y-intercept = {ln_rate_best_intercept:.6f}, R^2 = {ln_rate_r2:.4f}",
 	)
 	plt.plot(
-		temperature_line,
+		inverse_temperature_line,
 		ln_rate_min_line,
 		":",
 		color="#2ca02c",
 		alpha=0.9,
-		label=f"Minimum fit in ln-space: gradient = {ln_rate_min_slope:.6f}, y-intercept = {ln_rate_min_intercept:.6f}",
+		label=f"Minimum fit: gradient = {ln_rate_min_slope:.6f}, y-intercept = {ln_rate_min_intercept:.6f}",
 	)
 	plt.plot(
-		temperature_line,
+		inverse_temperature_line,
 		ln_rate_max_line,
 		":",
 		color="#ff7f0e",
 		alpha=0.9,
-		label=f"Maximum fit in ln-space: gradient = {ln_rate_max_slope:.6f}, y-intercept = {ln_rate_max_intercept:.6f}",
+		label=f"Maximum fit: gradient = {ln_rate_max_slope:.6f}, y-intercept = {ln_rate_max_intercept:.6f}",
 	)
 
-	plt.title("ln(Hydrogen Production Rate) vs Temperature with Uncertainty")
-	plt.xlabel("Temperature (K)")
+	plt.title("ln(Hydrogen Production Rate) vs 1 / Temperature")
+	plt.xlabel("1 / Temperature (K^-1)")
 	plt.ylabel("ln(Hydrogen Production Rate)")
 	plt.grid(alpha=0.25)
 	plt.legend()
