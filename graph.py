@@ -14,7 +14,7 @@ def load_data(csv_path: Path):
 		for row in reader:
 			rows.append(row)
 
-	temperatures_c = np.array([float(r["Average Temp"]) for r in rows], dtype=float)
+	temperatures_c = np.array([float(r["Average Temp"]) + 273.15 for r in rows], dtype=float)
 	temperature_uncertainties = np.array([float(r["Temp Uncertainty"]) for r in rows], dtype=float)
 
 	rate_values = np.array([float(r["Average Rate (temp)"]) for r in rows], dtype=float)
@@ -101,7 +101,7 @@ def fit_best_min_max(
 def main():
 	base_dir = Path(__file__).resolve().parent
 	csv_path = base_dir / "data.csv"
-
+    
 	temperatures_c, temperature_uncertainties, rate_values, rate_uncertainties = load_data(csv_path)
 
 	(rate_best_fit, rate_min_fit, rate_max_fit) = fit_best_min_max(
@@ -159,7 +159,7 @@ def main():
 		fmt="s",
 		capsize=3,
 		color="#d62728",
-		label="Average Rate (temp)",
+		label="Hydrogen production rate",
 	)
 	plt.plot(
 		temperature_line,
@@ -167,7 +167,7 @@ def main():
 		"--",
 		color="#1f77b4",
 		alpha=0.9,
-		label=f"Best fit (unweighted), R^2 = {rate_r2:.4f}",
+		label=f"Best fit: gradient = {rate_best_slope:.6e}, y-intercept = {rate_best_intercept:.6e}, R^2 = {rate_r2:.4f}",
 	)
 	plt.plot(
 		temperature_line,
@@ -175,7 +175,7 @@ def main():
 		":",
 		color="#2ca02c",
 		alpha=0.9,
-		label="Minimum fit",
+		label=f"Minimum fit: gradient = {rate_min_slope:.6e}, y-intercept = {rate_min_intercept:.6e}",
 	)
 	plt.plot(
 		temperature_line,
@@ -183,10 +183,10 @@ def main():
 		":",
 		color="#ff7f0e",
 		alpha=0.9,
-		label="Maximum fit",
+		label=f"Maximum fit: gradient = {rate_max_slope:.6e}, y-intercept = {rate_max_intercept:.6e}",
 	)
 
-	plt.title("Rate vs Temperature with Uncertainty")
+	plt.title("Hydrogen Production Rate vs Temperature")
 	plt.xlabel("Temperature (°C)")
 	plt.ylabel("Rate (mol/s)")
 	plt.grid(alpha=0.25)
@@ -206,7 +206,7 @@ def main():
 		fmt="s",
 		capsize=3,
 		color="#d62728",
-		label="ln(Average Rate (temp))",
+		label="ln(Hydrogen production rate)",
 	)
 
 	plt.plot(
@@ -215,7 +215,7 @@ def main():
 		"--",
 		color="#1f77b4",
 		alpha=0.9,
-		label=f"Best fit in ln-space (unweighted), R^2 = {ln_rate_r2:.4f}",
+		label=f"Best fit in ln-space: gradient = {ln_rate_best_slope:.6f}, y-intercept = {ln_rate_best_intercept:.6f}, R^2 = {ln_rate_r2:.4f}",
 	)
 	plt.plot(
 		temperature_line,
@@ -223,7 +223,7 @@ def main():
 		":",
 		color="#2ca02c",
 		alpha=0.9,
-		label="Minimum fit in ln-space",
+		label=f"Minimum fit in ln-space: gradient = {ln_rate_min_slope:.6f}, y-intercept = {ln_rate_min_intercept:.6f}",
 	)
 	plt.plot(
 		temperature_line,
@@ -231,12 +231,12 @@ def main():
 		":",
 		color="#ff7f0e",
 		alpha=0.9,
-		label="Maximum fit in ln-space",
+		label=f"Maximum fit in ln-space: gradient = {ln_rate_max_slope:.6f}, y-intercept = {ln_rate_max_intercept:.6f}",
 	)
 
-	plt.title("ln(Rate) vs Temperature with Uncertainty")
+	plt.title("ln(Hydrogen Production Rate) vs Temperature with Uncertainty")
 	plt.xlabel("Temperature (°C)")
-	plt.ylabel("ln(Rate)")
+	plt.ylabel("ln(Hydrogen Production Rate)")
 	plt.grid(alpha=0.25)
 	plt.legend()
 	plt.tight_layout()
