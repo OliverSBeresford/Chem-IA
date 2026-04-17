@@ -205,7 +205,7 @@ def main():
 	plt.legend()
 	plt.tight_layout()
 
-	output_path = base_dir / "graph.png"
+	output_path = base_dir / "LinearFit.png"
 	plt.savefig(output_path, dpi=200)
 	plt.show()
 
@@ -253,7 +253,7 @@ def main():
 	plt.legend()
 	plt.tight_layout()
 
-	output_path_ln = base_dir / "graph_ln.png"
+	output_path_ln = base_dir / "ExponentialFit.png"
 	plt.savefig(output_path_ln, dpi=200)
 	plt.show()
 
