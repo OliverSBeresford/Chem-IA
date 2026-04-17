@@ -212,7 +212,7 @@ def main():
 		fmt="s",
 		capsize=3,
 		color="#d62728",
-		label="ln(Hydrogen production rate)",
+		label="ln( Hydrogen production rate ) (unitless)",
 	)
 
 	plt.plot(
@@ -242,7 +242,7 @@ def main():
 
 	plt.title("ln(Hydrogen Production Rate) vs 1 / Temperature")
 	plt.xlabel("1 / Temperature (K^-1)")
-	plt.ylabel("ln(Hydrogen Production Rate)")
+	plt.ylabel("ln( Hydrogen production rate ) (unitless)")
 	plt.grid(alpha=0.25)
 	plt.legend()
 	plt.tight_layout()
