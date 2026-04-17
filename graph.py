@@ -7,6 +7,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
+plt.rcParams.update({
+	"font.family": "STIXGeneral",
+	"mathtext.fontset": "stix",
+})
+
+
 def load_data(csv_path: Path):
 	rows = []
 	with csv_path.open(newline="", encoding="utf-8") as f:
@@ -173,7 +179,7 @@ def main():
 		"--",
 		color="#1f77b4",
 		alpha=0.9,
-		label=f"Best fit: gradient = {rate_best_slope:.6e}, y-intercept = {rate_best_intercept:.6e}, R^2 = {rate_r2:.4f}",
+		label=f"Best fit: gradient = {rate_best_slope:.6e}, y-intercept = {rate_best_intercept:.6e}, " + rf"$R^2 = {rate_r2:.4f}$",
 	)
 	plt.plot(
 		temperature_line,
@@ -212,7 +218,7 @@ def main():
 		fmt="s",
 		capsize=3,
 		color="#d62728",
-		label="ln( Hydrogen production rate ) (unitless)",
+		label=r"$\ln(\mathrm{Hydrogen\ production\ rate})$",
 	)
 
 	plt.plot(
@@ -221,7 +227,7 @@ def main():
 		"--",
 		color="#1f77b4",
 		alpha=0.9,
-		label=f"Best fit: gradient = {ln_rate_best_slope:.6f}, y-intercept = {ln_rate_best_intercept:.6f}, R^2 = {ln_rate_r2:.4f}",
+		label=f"Best fit: gradient = {ln_rate_best_slope:.6f}, y-intercept = {ln_rate_best_intercept:.6f}, " + rf"$R^2 = {ln_rate_r2:.4f}$",
 	)
 	plt.plot(
 		inverse_temperature_line,
@@ -240,9 +246,9 @@ def main():
 		label=f"Maximum fit: gradient = {ln_rate_max_slope:.6f}, y-intercept = {ln_rate_max_intercept:.6f}",
 	)
 
-	plt.title("ln(Hydrogen Production Rate) vs 1 / Temperature")
-	plt.xlabel("1 / Temperature (K^-1)")
-	plt.ylabel("ln( Hydrogen production rate ) (unitless)")
+	plt.title(r"$\ln(\mathrm{Hydrogen\ Production\ Rate})$ vs $1/T$")
+	plt.xlabel(r"$1/T\ (\mathrm{K}^{-1})$")
+	plt.ylabel(r"$\ln(\mathrm{Hydrogen\ production\ rate})\ (unitless)$")
 	plt.grid(alpha=0.25)
 	plt.legend()
 	plt.tight_layout()
