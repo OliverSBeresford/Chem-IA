@@ -124,7 +124,7 @@ def main():
 	# Uncertainty propagation for ln(y): sigma_ln(y) = sigma_y / y
 	ln_rate_values = np.log(rate_values)
 	ln_rate_uncertainties = rate_uncertainties / rate_values
-	inverse_temperatures_k, inverse_temperature_uncertainties = 1.0 / temperatures_k, (1.0 / temperatures_k) * (temperature_uncertainties / temperatures_k)
+	inverse_temperatures_k, inverse_temperature_uncertainties = 1.0 / temperatures_k, temperature_uncertainties / (temperatures_k ** 2)
 
 	(ln_rate_best_fit, ln_rate_min_fit, ln_rate_max_fit) = fit_best_min_max(
 		inverse_temperatures_k,
